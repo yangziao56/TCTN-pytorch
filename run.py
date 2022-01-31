@@ -32,12 +32,12 @@ parser.add_argument('--train_data_paths', type=str, default=train_path)
 parser.add_argument('--valid_data_paths', type=str, default=valid_path)
 
 # save_dir
-parser.add_argument('--save_dir', type=str, default='moving-mnist/checkpoints/mnistseq_tctn')
-parser.add_argument('--gen_frm_dir', type=str, default='moving-mnist/results/mnistseq_tctn')
-parser.add_argument('--loss_dir', type=str, default='moving-mnist/loss/mnistseq_tctn')
+parser.add_argument('--save_dir', type=str, default='moving-mnist/checkpoints/mnist_tctn')
+parser.add_argument('--gen_frm_dir', type=str, default='moving-mnist/results/mnist_tctn')
+parser.add_argument('--loss_dir', type=str, default='moving-mnist/loss/mnist_tctn')
 
 # the print content save path, ect training loss
-parser.add_argument('--print_path', type=str, default='moving-mnist/loss/mnistseq_tctn')
+parser.add_argument('--print_path', type=str, default='moving-mnist/loss/mnist_tctn')
 
 # input & output size
 parser.add_argument('--input_length', type=int, default=10)
@@ -188,13 +188,13 @@ def test_wrapper(model):
     np.savez_compressed(args.loss_dir + fileName, avg_mse=avg_mse, ssim=ssim, psnr=psnr, fmae=fmae, sharp=sharp)
 
 
-#if os.path.exists(args.save_dir):
-    #shutil.rmtree(args.save_dir)
-#os.makedirs(args.save_dir)
+if os.path.exists(args.save_dir):
+    shutil.rmtree(args.save_dir)
+os.makedirs(args.save_dir)
 
-#if os.path.exists(args.gen_frm_dir):
-    #shutil.rmtree(args.gen_frm_dir)
-#os.makedirs(args.gen_frm_dir)
+if os.path.exists(args.gen_frm_dir):
+    shutil.rmtree(args.gen_frm_dir)
+os.makedirs(args.gen_frm_dir)
 
 if not os.path.exists(args.loss_dir):
     os.makedirs(args.loss_dir)
