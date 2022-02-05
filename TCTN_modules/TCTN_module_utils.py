@@ -25,13 +25,15 @@ class QKVNet(nn.Module):
 class out(nn.Module):
     def __init__(self, depth):
         super(out, self).__init__()
+        self.pad = (3 - 1) *1
         self.conv0 = nn.Sequential(
-            nn.Conv3d(in_channels=depth, out_channels=depth, kernel_size=1, stride=1, padding=0, bias=True),
+            nn.Conv3d(in_channels=depth, out_channels=depth, kernel_size=(1,1,1), stride=1, padding=(0,0,0), bias=True),
             #nn.GroupNorm(num_groups=1, num_channels=depth)
         )
 
     def forward(self, input_tensor):
-        out = self.conv0(input_tensor.permute(0, 2, 1, 3, 4)).permute(0, 2, 1, 3, 4)
+        out = self.conv0(input_tensor.permute(0, 2, 1, 3, 4))
+        out = out.permute(0, 2, 1, 3, 4)
         return out
 
 class FeedForwardNet(nn.Module):
@@ -39,23 +41,24 @@ class FeedForwardNet(nn.Module):
         super(FeedForwardNet, self).__init__()
         self.pad = (3 - 1) *1
         self.conv0 = nn.Sequential(
-            nn.Conv3d(in_channels=depth, out_channels=depth*6, kernel_size=(3,3,3), stride=1, padding=(self.pad,1,1), bias=True),
+            nn.Conv3d(in_channels=depth, out_channels=depth*3, kernel_size=(3,3,3), stride=1, padding=(self.pad,1,1), bias=True),
             #nn.GroupNorm(num_groups=1, num_channels=depth*4),
             nn.LeakyReLU(0.2, inplace=True)
         )
         self.conv1 = nn.Sequential(
-            nn.Conv3d(in_channels=depth*6, out_channels=depth, kernel_size=1, stride=1, padding=0, bias=True),
+            nn.Conv3d(in_channels=depth*3, out_channels=depth, kernel_size=(3,3,3), stride=1, padding=(self.pad,1,1), bias=True),
             #nn.GroupNorm(num_groups=1, num_channels=depth)
         )
         
-        self.dropout1 = nn.Dropout3d(0.3)
+        self.dropout1 = nn.Dropout3d(0.1)
 
     def forward(self, input_tensor):
         #[batch, seq, channel, height, width]
         out = self.conv0(input_tensor.permute(0, 2, 1, 3, 4))
         out = out[:, :, :-self.pad]
         out = self.dropout1(out)
-        out = self.conv1(out).permute(0, 2, 1, 3, 4)
+        out = self.conv1(out)
+        out = out[:, :, :-self.pad].permute(0, 2, 1, 3, 4)
         return out
 
 

@@ -24,7 +24,7 @@ class DecoderEmbedding(nn.Module):
         )
       
         self.depth = depth
-        self.dropout = nn.Dropout3d(0.3)
+        self.dropout = nn.Dropout3d(0.1)
        
 
     def forward(self, input_img):
@@ -91,8 +91,8 @@ class DecoderLayer(nn.Module):
         self.feedforward = FeedForwardNet(self.depth)
         self.GN1 = nn.GroupNorm(num_groups=1, num_channels=model_depth)
         self.GN2 = nn.GroupNorm(num_groups=1, num_channels=model_depth)
-        self.dropout1 = nn.Dropout3d(0.3)
-        self.dropout2 = nn.Dropout3d(0.3)
+        self.dropout1 = nn.Dropout3d(0.1)
+        self.dropout2 = nn.Dropout3d(0.1)
 
     def __get_clones(self, module, n):
         return nn.ModuleList([copy.deepcopy(module) for i in range(n)])
@@ -120,7 +120,7 @@ class MultiHeadAttention(nn.Module):
         self.qkv =QKVNet(self.depth_perhead*self.num_heads)
         self.with_pos = with_pos
         #self.time_weighting = nn.Parameter(torch.ones(batch, height, width, self.num_heads, seq, seq))
-        self.dropout1 = nn.Dropout3d(0.3)
+        self.dropout1 = nn.Dropout3d(0.1)
 
     def forward(self, input_tensor, pos_decoding, type=0):  # encoderin换用model方式描述， 比如model = 0 or 1
         if type == 0:  # deocder--query self attention
