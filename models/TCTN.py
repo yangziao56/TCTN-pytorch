@@ -36,32 +36,34 @@ class TCTN(nn.Module):
                 out = self.conv_last(decoderout.permute(0, 2, 1, 3, 4)).permute(0, 2, 1, 3, 4)
             
         else:
-            for i in range(self.configs.test_total_length - self.configs.test_input_length):
+            for i in range(self.configs.total_length - self.configs.input_length):
                 if i  == 0 :
-                    img_last = input_img[:, 0:self.configs.test_input_length]
-                    #print(img_last.shape)
-                    dec_init = self.decoder_embedding(img_last)
+                    dec_init = self.decoder_embedding(input_img[:, 0:self.configs.input_length])
                 else:
-                    #dec_init = torch.cat((dec_init,new_embedding),1)
-                    dec_init = new_embedding
+                    #embedding_out[3+i] = new_embedding
+                    #dec_init = self.encoder_embedding(embedding_out[0:4+i])
+                    dec_init = torch.cat((dec_init,new_embedding),1)
+                    #print(dec_init.shape)
+                    #dec_init = self.decoder_embedding(input_img[0:self.configs.input_length+i])
                 decoderout = self.decoder(dec_init)
                 #print(decoderout.shape)
+                #out = self.prediction(decoderout)
 
-                if i < self.configs.test_total_length - self.configs.test_input_length - 1:
+                if i < self.configs.total_length - self.configs.input_length - 1:
                     nex_img = decoderout[:,-1].unsqueeze(1)
                     if self.configs.w_pffn == 1:
                         img = self.prediction(nex_img)
                     else:
                         img = self.conv_last(nex_img.permute(0, 2, 1, 3, 4)).permute(0, 2, 1, 3, 4)
-                    #print(img.shape)
-                    img_last = torch.cat((img_last,img),1)
-                    #print(img_last.shape)
-                    new_embedding = self.decoder_embedding(img_last)
+                        #print(img.shape)
+                    new_embedding = self.decoder_embedding(img)
+                    #print(new_embedding.shape)
                 else:
                     if self.configs.w_pffn == 1:
                         out = self.prediction(decoderout)
                     else:
-                        out = self.conv_last(decoderout.permute(0, 2, 1, 3, 4)).permute(0, 2, 1, 3, 4)                   
+                        out = self.conv_last(decoderout.permute(0, 2, 1, 3, 4)).permute(0, 2, 1, 3, 4)
+                    
         
         return out
 
