@@ -9,20 +9,28 @@ from TCTN_modules.TCTN_module_utils import *
 class DecoderEmbedding(nn.Module):
     def __init__(self, depth=256):
         super(DecoderEmbedding, self).__init__()
-        self.pad = (3 - 1) *1
+        #self.pad = (3 - 1) *1
         self.conv0 = nn.Sequential(
-            nn.Conv3d(in_channels=16, out_channels=depth, kernel_size=(3,7,7), stride=1, padding=(self.pad,3,3), bias=True),
+            nn.Conv3d(in_channels=16, out_channels=depth, kernel_size=(1,7,7), stride=1, padding=(0,3,3), bias=True),
             #nn.GroupNorm(num_groups=1, num_channels=depth),
             nn.LeakyReLU(0.2, inplace=True)
             # inplace=True的意思是进行原地操作，例如x=x+5, 对tensor直接进行修改，好处就是可以节省运行内存，不用多存储变量
         )
+        
         self.conv1 = nn.Sequential(
-            nn.Conv3d(in_channels=depth, out_channels=depth, kernel_size=(3,5,5), stride=1, padding=(self.pad,2,2), bias=True),
+            nn.Conv3d(in_channels=depth, out_channels=depth, kernel_size=(1,5,5), stride=1, padding=(0,2,2), bias=True),
             #nn.GroupNorm(num_groups=1, num_channels=depth),
             nn.LeakyReLU(0.2, inplace=True)
             # inplace=True的意思是进行原地操作，例如x=x+5, 对tensor直接进行修改，好处就是可以节省运行内存，不用多存储变量
         )
-      
+
+        self.conv2 = nn.Sequential(
+            nn.Conv3d(in_channels=depth, out_channels=depth, kernel_size=(1,5,5), stride=1, padding=(0,2,2), bias=True),
+            #nn.GroupNorm(num_groups=1, num_channels=depth),
+            nn.LeakyReLU(0.2, inplace=True)
+            # inplace=True的意思是进行原地操作，例如x=x+5, 对tensor直接进行修改，好处就是可以节省运行内存，不用多存储变量
+        )
+        
         self.depth = depth
         self.dropout = nn.Dropout3d(0.1)
        
@@ -32,10 +40,13 @@ class DecoderEmbedding(nn.Module):
         img_ = input_img.permute(0, 2, 1, 3, 4).clone()
         
         feature_0 = self.conv0(img_)
-        feature_0 = feature_0[:, :, :-self.pad]
+        #feature_0 = feature_0[:, :, :-self.pad]
         feature_1 = self.conv1(feature_0)
-        feature_1 = feature_1[:, :, :-self.pad]
+        #feature_1 = feature_1[:, :, :-self.pad]
         feature_1 = feature_0 + feature_1
+        #feature_2 = self.conv2(feature_1)
+        #feature_2 = feature_1+feature_2
+
         '''
         b, c, s, h, w = feature_2.shape
         pos = positional_encoding(s, self.depth, h, w)
@@ -141,8 +152,21 @@ class MultiHeadAttention(nn.Module):
             v = v_feature.permute(0, 4, 5, 1, 3, 2)
             attention_map = torch.matmul(q, k)/math.sqrt(self.depth_perhead)#[batch, height, width, heads seq, seq]
             #print(attention_map[0][0][0][0])
-            #sequence mask
+
+            '''
+            #distribution
+            s_q = np.arange(seq)[:, np.newaxis]
+            s_k = np.arange(seq)[np.newaxis, :]
+            GD = np.exp(-(s_k-s_q)*(s_k-s_q)/2)/seq
+            #GD = -(s_k-s_q)*(s_k-s_q)/(seq*seq*seq)
+            GD = torch.from_numpy(GD).unsqueeze(0).expand(batch*height*width*self.num_heads, -1, -1).view(batch, height, width, self.num_heads, seq, seq)
+            GD = torch.tensor(GD, dtype=torch.float32).cuda()
+            attention_map = attention_map + GD
+            '''
+
+            #sequence mask & sparse attention
             mask = 1- torch.triu(torch.ones((seq, seq)),diagonal=1)
+            #mask = torch.triu(mask,diagonal=-1)#-1
             mask = mask.unsqueeze(0).expand(batch*height*width*self.num_heads, -1, -1).view(batch, height, width, self.num_heads, seq, seq).cuda()
             attention_map = attention_map * mask
             attention_map = attention_map.masked_fill(attention_map==0, -1e9)
