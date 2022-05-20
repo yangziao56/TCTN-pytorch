@@ -27,13 +27,13 @@ class out(nn.Module):
         super(out, self).__init__()
         self.pad = (3 - 1) *1
         self.conv0 = nn.Sequential(
-            nn.Conv3d(in_channels=depth, out_channels=depth, kernel_size=(1,1,1), stride=1, padding=(0,0,0), bias=True),
+            nn.Conv3d(in_channels=depth, out_channels=depth, kernel_size=(3,3,3), stride=1, padding=(self.pad,1,1), bias=True),
             #nn.GroupNorm(num_groups=1, num_channels=depth)
         )
 
     def forward(self, input_tensor):
         out = self.conv0(input_tensor.permute(0, 2, 1, 3, 4))
-        out = out.permute(0, 2, 1, 3, 4)
+        out = out[:, :, :-self.pad].permute(0, 2, 1, 3, 4)
         return out
 
 class FeedForwardNet(nn.Module):
