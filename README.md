@@ -1,39 +1,32 @@
-<p align="center">
-  <img src="assets/readme-banner.svg" width="100%" alt="TCTN — Learning how the next frame unfolds." />
-</p>
+![TCTN: from observed frames to future frames.](assets/readme-banner.svg)
 
-### TCTN: A 3D-Temporal Convolutional Transformer Network for Spatiotemporal Predictive Learning
+<p align="center"><strong>A 3D-Temporal Convolutional Transformer Network<br>for Spatiotemporal Predictive Learning</strong></p>
+<p align="center">Ziao Yang · Xiangrui Yang · Qifeng Lin</p>
+<p align="center"><a href="https://arxiv.org/pdf/2112.01085v1"><strong>Read PDF</strong></a> &nbsp; · &nbsp; <a href="https://arxiv.org/abs/2112.01085v1">Paper</a> &nbsp; · &nbsp; <a href="https://drive.google.com/drive/folders/1goWCEQoSWlcdmhV-UQffnNQLMa1FabeK?usp=sharing">Moving MNIST</a></p>
 
-**Ziao Yang**, Xiangrui Yang, and Qifeng Lin
+## Inside TCTN
 
-**[PDF](https://arxiv.org/pdf/2112.01085v1)** · **[Paper](https://arxiv.org/abs/2112.01085v1)** · **[Explore code](#explore-the-model)**
+A PyTorch implementation combining **3D temporal convolution** with **Transformer-based modeling** for spatiotemporal prediction.
 
----
+```text
+Data loaders → TCTN modules → Training & evaluation → Predicted frames
+```
 
-PyTorch implementation of TCTN for spatiotemporal predictive learning, combining 3D temporal convolution with Transformer-based modeling.
+| Network | Training | Data & metrics |
+| :--- | :--- | :--- |
+| [`models/TCTN.py`](models/TCTN.py) | [`run.py`](run.py) | [`data_provider/`](data_provider/) |
+| [`TCTN_modules/`](TCTN_modules/) | [`trainer.py`](trainer.py) | [`utils/`](utils/) |
 
-## Explore the model
-
-| Component | Entry point |
-| :--- | :--- |
-| TCTN architecture | [`models/TCTN.py`](models/TCTN.py) |
-| Network modules | [`TCTN_modules/`](TCTN_modules/) |
-| Training and evaluation | [`run.py`](run.py) · [`trainer.py`](trainer.py) |
-| Data loading | [`data_provider/`](data_provider/) |
-| Metrics and preprocessing | [`utils/`](utils/) |
-
-## Getting started
+## Set up a sequence
 
 ```bash
 git clone https://github.com/yangziao56/TCTN-pytorch.git
 cd TCTN-pytorch
 ```
 
-Download the [Moving MNIST dataset](https://drive.google.com/drive/folders/1goWCEQoSWlcdmhV-UQffnNQLMa1FabeK?usp=sharing), then set the training and validation paths in [`run.py`](run.py). The entry point exposes options for sequence length, image size, model depth, and training settings.
+Download Moving MNIST from the link above, then set the training and validation paths in `run.py`. The entry point exposes sequence length, image size, model depth, and training settings.
 
-For questions about applying TCTN to other datasets, contact [Ziao Yang](mailto:ziaoyang@brandeis.edu).
-
----
+Questions about another dataset? [Contact Ziao Yang](mailto:ziaoyang@brandeis.edu).
 
 <details>
 <summary><strong>Citation</strong></summary>
