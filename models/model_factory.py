@@ -43,7 +43,7 @@ class Model(object):
 
     def load(self, checkpoint_path):
         print('load model:', checkpoint_path)
-        stats = torch.load(checkpoint_path)
+        stats = torch.load(checkpoint_path, weights_only=True)
         self.network.load_state_dict(stats['net_param'])
         # self.optimizer.load_state_dict(stats['optimizer_param'])
 
